@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #dbe5ff;
+  --color-brand-200: #b6c9fb;
+  --color-brand-500: #2457d6;
+  --color-brand-600: #1a45b5;
+  --color-brand-700: #133896;
+  --color-brand-800: #0e2d78;
+  --color-brand-900: #0b2a6b;
+  --color-brand-950: #061740;
+  --color-volt-300: #ffd95c;
+  --color-volt-400: #ffc20e;
+  --color-volt-500: #f5a800;
+  --color-flame-500: #f7941d;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
+
+@utility input-base {
+  @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-base text-slate-900 shadow-sm
+    placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none
+    disabled:bg-slate-100 aria-invalid:border-red-500 aria-invalid:ring-red-500/20;
+}
