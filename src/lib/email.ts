@@ -14,7 +14,9 @@ export async function sendEmail(mail: Mail): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
   const from = process.env.EMAIL_FROM ?? "Kinetix <onboarding@resend.dev>";
   if (!key) {
-    console.info(`[email:dev] to=${mail.to} subject="${mail.subject}"`);
+    // Dev mode: print the email and any links in the terminal (e.g. the one-tap review link).
+    const links = Array.from(mail.html.matchAll(/href="(http[^"]+)"/g), (m) => m[1].replace(/&amp;/g, "&"));
+    console.info(`\n[email:dev] to=${mail.to}\n  subject: ${mail.subject}${links.map((l) => `\n  link: ${l}`).join("")}\n`);
     return true;
   }
   try {
