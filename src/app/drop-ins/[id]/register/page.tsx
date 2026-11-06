@@ -24,21 +24,21 @@ export default async function RegisterPage({ params }: { params: Promise<{ id: s
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto max-w-2xl px-4 pt-6">
-        <Link href="/drop-ins" className="inline-flex items-center gap-1 text-sm font-medium text-slate-600 hover:text-brand-800">
+      <main className="mx-auto max-w-2xl px-4 pb-28 pt-6 md:pb-0">
+        <Link href="/drop-ins" className="inline-flex min-h-11 items-center gap-1 font-semibold text-muted transition-colors hover:text-brand-700">
           <ArrowLeft className="size-4" /> All sessions
         </Link>
 
-        <section className="mt-4 overflow-hidden rounded-2xl bg-brand-900 text-white shadow-lg">
+        <section className="court-lines mt-2 overflow-hidden rounded-3xl bg-ink text-white shadow-[8px_8px_0_0_var(--color-volt-400)]">
           <div className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-volt-300">Session {session.code}</p>
-                <h1 className="mt-1 font-display text-3xl font-bold uppercase leading-tight">{session.venue_name}</h1>
+                <p className="font-display text-sm font-bold uppercase tracking-widest text-volt-300">Session {session.code}</p>
+                <h1 className="mt-1 font-display text-4xl font-extrabold uppercase italic leading-none">{session.venue_name}</h1>
               </div>
-              <p className="font-display text-3xl font-bold text-volt-400">{formatMoney(session.price_cents)}</p>
+              <p className="shrink-0 rounded-xl bg-volt-400 px-3 py-1 font-display text-3xl font-extrabold text-ink">{formatMoney(session.price_cents).replace(".00", "")}</p>
             </div>
-            <dl className="mt-4 grid grid-cols-1 gap-2 text-sm text-white/85 sm:grid-cols-2">
+            <dl className="mt-5 grid grid-cols-1 gap-2.5 text-[15px] text-white/85 sm:grid-cols-2">
               <div className="flex items-center gap-2"><CalendarDays className="size-4 text-volt-400" />{formatDate(session.starts_at, { weekday: "long", month: "long" })}</div>
               <div className="flex items-center gap-2"><Clock className="size-4 text-volt-400" />{formatTimeRange(session.starts_at, session.ends_at)}</div>
               <div className="flex items-start gap-2 sm:col-span-2"><MapPin className="mt-0.5 size-4 shrink-0 text-volt-400" />{session.venue_address}</div>

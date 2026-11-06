@@ -10,9 +10,9 @@ const variants = {
 } as const;
 
 const sizes = {
-  sm: "h-9 px-3 text-sm",
-  md: "h-11 px-4 text-sm",
-  lg: "h-13 px-6 text-base",
+  sm: "min-h-11 px-3 text-sm",
+  md: "min-h-11 px-4 text-sm",
+  lg: "min-h-13 px-6 text-base",
 } as const;
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -22,7 +22,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function buttonClasses(variant: keyof typeof variants = "primary", size: keyof typeof sizes = "md", className?: string) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50",
     variants[variant],
     sizes[size],
     className,

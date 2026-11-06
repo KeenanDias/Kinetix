@@ -1,45 +1,78 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { ArrowRight, Mail } from "lucide-react";
 import { siteConfig } from "@/lib/config";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-30 border-b border-white/10 bg-brand-900/95 backdrop-blur supports-[backdrop-filter]:bg-brand-900/85">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/kinetix-logo.png" alt="Kinetix" width={40} height={40} className="size-10 rounded-full ring-2 ring-volt-400/70" priority />
-          <span className="font-display text-xl font-bold uppercase tracking-wide text-white">
-            Kinetix <span className="text-volt-400">Volleyball</span>
+    <header className="sticky top-0 z-40 bg-ink/95 backdrop-blur supports-[backdrop-filter]:bg-ink/85">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
+        <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-lg" aria-label="Kinetix home">
+          <Image src="/kinetix-logo.png" alt="" width={40} height={40} className="size-10 shrink-0 rounded-full ring-2 ring-volt-400" priority />
+          <span className="truncate font-display text-2xl font-extrabold uppercase italic tracking-tight text-white">
+            Kinetix<span className="text-volt-400">.</span>
           </span>
         </Link>
-        <nav className="flex items-center gap-1">
-          <Link href="/drop-ins" className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-white/90 hover:bg-white/10 sm:block">
-            Drop-ins
+        <nav className="flex items-center gap-1" aria-label="Main">
+          <Link href="/drop-ins" className="hidden min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white md:flex">
+            Schedule
           </Link>
           {siteConfig.instagramUrl && (
-            <a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram" className="rounded-lg p-2 text-white/90 hover:bg-white/10">
+            <a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer" aria-label="Kinetix on Instagram" className="grid size-11 place-items-center rounded-lg text-white/85 transition-colors hover:bg-white/10 hover:text-white">
               <InstagramIcon />
             </a>
           )}
           {siteConfig.contactEmail && (
-            <a href={`mailto:${siteConfig.contactEmail}`} aria-label="Email us" className="rounded-lg p-2 text-white/90 hover:bg-white/10">
-              <Mail className="size-5" />
+            <a href={`mailto:${siteConfig.contactEmail}`} aria-label="Email Kinetix" className="hidden size-11 place-items-center rounded-lg text-white/85 transition-colors hover:bg-white/10 hover:text-white sm:grid">
+              <Mail className="size-5" aria-hidden />
             </a>
           )}
+          <Link
+            href="/drop-ins"
+            className="ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-volt-400 px-4 font-display text-base font-bold uppercase tracking-wide text-ink transition-colors hover:bg-volt-300"
+          >
+            Book <span className="hidden sm:inline">a game</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
         </nav>
       </div>
+      <div className="h-1 bg-gradient-to-r from-brand-500 via-volt-400 to-flame-500" aria-hidden />
     </header>
   );
 }
 
 export function SiteFooter() {
   return (
-    <footer className="mt-16 border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:justify-between">
-        <p>© {new Date().getFullYear()} Kinetix Volleyball. Play hard, play fair.</p>
-        <p>Payments via Interac e-Transfer · Spots confirmed by email</p>
+    <footer className="court-lines mt-20 bg-ink text-white">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:grid-cols-[1.4fr_1fr_1fr]">
+        <div>
+          <p className="font-display text-3xl font-extrabold uppercase italic">
+            Kinetix<span className="text-volt-400">.</span>
+          </p>
+          <p className="mt-2 max-w-xs text-white/70">Competitive, well-run volleyball drop-ins. Play hard, play fair.</p>
+        </div>
+        <div>
+          <p className="font-display text-sm font-bold uppercase tracking-widest text-volt-400">How it works</p>
+          <ul className="mt-3 space-y-1.5 text-white/75">
+            <li>Pick a session</li>
+            <li>Send an Interac e-Transfer</li>
+            <li>Get your court by email</li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-display text-sm font-bold uppercase tracking-widest text-volt-400">Contact</p>
+          <ul className="mt-3 space-y-1.5 text-white/75">
+            {siteConfig.contactEmail && (
+              <li><a className="underline-offset-4 hover:text-white hover:underline" href={`mailto:${siteConfig.contactEmail}`}>{siteConfig.contactEmail}</a></li>
+            )}
+            {siteConfig.instagramUrl && (
+              <li><a className="underline-offset-4 hover:text-white hover:underline" href={siteConfig.instagramUrl} target="_blank" rel="noreferrer">Instagram</a></li>
+            )}
+            <li><Link className="underline-offset-4 hover:text-white hover:underline" href="/admin">Host login</Link></li>
+          </ul>
+        </div>
       </div>
+      <p className="border-t border-white/10 py-5 text-center text-sm text-white/50">© {new Date().getFullYear()} Kinetix Volleyball</p>
     </footer>
   );
 }

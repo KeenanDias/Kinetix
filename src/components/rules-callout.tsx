@@ -18,8 +18,8 @@ export function RulesCallout({ skill }: { skill: SkillLevel }) {
   ];
 
   return (
-    <details className="group rounded-2xl border border-volt-400/50 bg-volt-400/10 open:bg-white open:shadow-sm" open>
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-semibold text-brand-900 [&::-webkit-details-marker]:hidden">
+    <details className="group rounded-2xl border-2 border-ink bg-white shadow-[4px_4px_0_0_var(--color-ink)]" open>
+      <summary className="flex min-h-14 list-none items-center justify-between gap-3 rounded-2xl p-4 font-display text-xl font-bold uppercase text-ink transition-colors hover:bg-surface [&::-webkit-details-marker]:hidden">
         <span className="flex items-center gap-2">
           <ShieldAlert className="size-5 text-flame-500" />
           Rules &amp; skill expectations

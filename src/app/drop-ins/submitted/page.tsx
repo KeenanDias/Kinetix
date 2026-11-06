@@ -14,20 +14,20 @@ export default function SubmittedPage() {
         <div className="grid size-20 place-items-center rounded-full bg-emerald-50 ring-8 ring-emerald-50/50">
           <CheckCircle2 className="size-11 text-emerald-600" />
         </div>
-        <h1 className="mt-6 font-display text-3xl font-bold uppercase text-brand-900">Application Submitted</h1>
-        <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-volt-400/20 px-3 py-1 text-sm font-semibold text-amber-800">
+        <h1 className="mt-6 font-display text-5xl font-extrabold uppercase italic leading-none text-ink">Application submitted</h1>
+        <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-volt-400 px-4 py-1.5 font-display text-base font-bold uppercase tracking-wide text-ink">
           Pending {siteConfig.hostName}&apos;s Review
         </p>
-        <p className="mt-5 text-slate-600">
+        <p className="mt-5 text-lg text-muted">
           You will receive an email once your spot and payment are verified. Your confirmation will include the court, location and the amount
           you paid.
         </p>
         <ul className="mt-8 w-full space-y-3 text-left text-sm">
-          <li className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <li className="flex gap-3 rounded-xl border-2 border-line bg-white p-4">
             <Inbox className="size-5 shrink-0 text-brand-700" />
             <span>We just sent a &quot;received&quot; email. Check spam/promotions if you don&apos;t see it.</span>
           </li>
-          <li className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4">
+          <li className="flex gap-3 rounded-xl border-2 border-line bg-white p-4">
             <ShieldCheck className="size-5 shrink-0 text-brand-700" />
             <span>Your screenshot is stored privately and only visible to the Kinetix host.</span>
           </li>
