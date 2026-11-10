@@ -11,8 +11,8 @@ export function CapacityMeter({ filled, max, className }: { filled: number; max:
         </span>
         <span className={cn("text-xs font-semibold", full ? "text-red-600" : "text-slate-500")}>{full ? "FULL" : `${max - filled} open`}</span>
       </div>
-      <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-200">
-        <div className={cn("h-full rounded-full", full ? "bg-red-500" : pct >= 80 ? "bg-volt-400" : "bg-brand-500")} style={{ width: `${pct}%` }} />
+      <div className="mt-1 h-2 overflow-hidden rounded-sm bg-slate-200">
+        <div className={cn("h-full rounded-sm", full ? "bg-red-500" : pct >= 80 ? "bg-volt-400" : "bg-brand-500")} style={{ width: `${pct}%` }} />
       </div>
     </div>
   );

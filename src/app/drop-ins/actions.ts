@@ -6,11 +6,21 @@ import { MAX_RECEIPT_BYTES, RECEIPT_MIME_TYPES, siteConfig } from "@/lib/config"
 import { hostNewRegistrationEmail, playerReceivedEmail, sendEmail } from "@/lib/email";
 import { createReviewToken } from "@/lib/review-token";
 import { createServiceClient } from "@/lib/supabase/admin";
-import { POSITION_LABELS, SKILL_LABELS, type PlayerPosition, type Registration, type Session, type SkillLevel } from "@/lib/types";
+import {
+  MAX_GUESTS,
+  POSITION_LABELS,
+  SKILL_LABELS,
+  type PlayerPosition,
+  type Registration,
+  type Session,
+  type SkillLevel,
+} from "@/lib/types";
 
 export type RegisterState = {
   error?: string;
-  fieldErrors?: Partial<Record<"full_name" | "email" | "phone" | "skill_level" | "position" | "waiver" | "sender_name" | "receipt", string>>;
+  fieldErrors?: Partial<
+    Record<"full_name" | "email" | "phone" | "skill_level" | "position" | "waiver" | "sender_name" | "receipt" | "guests", string>
+  >;
 };
 
 const EXT: Record<string, string> = {
@@ -37,8 +47,21 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
     sender_name: str(fd, "sender_name"),
   };
   const receipt = fd.get("receipt");
+  // Friends the registrant is paying for. Each row is a name + position; rows with a blank name are ignored.
+  const rawPositions = fd.getAll("guest_position").map((v) => String(v));
+  const guests = fd
+    .getAll("guest_name")
+    .map((v, i) => ({ name: String(v).replace(/\s+/g, " ").trim(), position: rawPositions[i] ?? "" }))
+    .filter((g) => g.name);
+  const guestNames = guests.map((g) => g.name);
+  const guestPositions = guests.map((g) => g.position as PlayerPosition);
+  const sameTeam = guests.length > 0 && fd.get("same_team") === "on";
+  const partySize = 1 + guests.length;
 
   const fieldErrors: RegisterState["fieldErrors"] = {};
+  if (guests.length > MAX_GUESTS) fieldErrors.guests = `You can add up to ${MAX_GUESTS} guests.`;
+  else if (guests.some((g) => g.name.length < 2 || g.name.length > 80)) fieldErrors.guests = "Enter each guest's full name.";
+  else if (guests.some((g) => !(g.position in POSITION_LABELS))) fieldErrors.guests = "Choose a position for each guest.";
   if (input.full_name.length < 2) fieldErrors.full_name = "Enter your full name.";
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(input.email)) fieldErrors.email = "Enter a valid email.";
   if (input.phone.replace(/\D/g, "").length < 10) fieldErrors.phone = "Enter a valid phone number.";
@@ -54,10 +77,29 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   const file = receipt as File;
   const svc = createServiceClient();
 
-  const { data: session } = await svc.from("sessions").select("*").eq("id", sessionId).eq("is_published", true).single<Session>();
+  const { data: session, error: lookupError } = await svc
+    .from("sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .eq("is_published", true)
+    .maybeSingle<Session>();
+  if (lookupError) {
+    // Usually a missing/wrong SUPABASE_SERVICE_ROLE_KEY — don't blame the session.
+    console.error("[register] session lookup failed", lookupError);
+    return { error: "We couldn't load this session right now. Please try again in a minute." };
+  }
   if (!session) return { error: "This session no longer exists." };
   if (new Date(session.starts_at) < new Date()) return { error: "This session has already started." };
-  if (session.filled_spots >= session.max_players) return { error: "Sorry — this session just sold out." };
+  const spotsLeft = session.max_players - session.filled_spots;
+  if (spotsLeft <= 0) return { error: "Sorry, this session just sold out." };
+  if (partySize > spotsLeft)
+    return {
+      fieldErrors: {
+        guests: `Only ${spotsLeft} spot${spotsLeft === 1 ? " is" : "s are"} left. Remove ${partySize - spotsLeft} guest${
+          partySize - spotsLeft === 1 ? "" : "s"
+        } to register.`,
+      },
+    };
 
   // 1) Upload receipt to the private bucket.
   const registrationId = randomUUID();
@@ -84,8 +126,10 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
       position: input.position,
       waiver_accepted: true,
       sender_name: input.sender_name,
-      amount_cents: session.price_cents,
+      amount_cents: session.price_cents * partySize,
       receipt_path: receiptPath,
+      // Only sent when there are guests, so solo sign-ups still work before migration 0002 is applied.
+      ...(guests.length > 0 ? { guest_names: guestNames, guest_positions: guestPositions, same_team: sameTeam } : {}),
     })
     .select("*")
     .single<Registration>();
@@ -94,6 +138,8 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
     await svc.storage.from("receipts").remove([receiptPath]);
     if (insertError?.code === "23505")
       return { error: "You've already applied for this session with this email. Watch your inbox for an update." };
+    if (insertError?.code === "PGRST204")
+      console.error("[register] guest column missing. Run supabase/migrations 0002 and 0004 in the Supabase SQL editor.");
     console.error("[register] insert failed", insertError);
     return { error: "Something went wrong saving your registration. Please try again." };
   }

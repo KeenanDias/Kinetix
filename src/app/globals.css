@@ -15,8 +15,10 @@
   --color-volt-500: #f5a800;
   --color-flame-500: #f7941d;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Body: Lato. Display (h1, h2, prices, wordmark): Outfit. Utility headings (h3): DM Sans. */
+  --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
@@ -24,15 +26,30 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-slate-50 font-sans text-base leading-relaxed text-slate-900 antialiased;
   }
+
+  /* Type scale. Page classes only add colour/spacing; size and family come from here. */
+  h1 {
+    @apply font-display text-[2.5rem] leading-[1.05] font-extrabold tracking-[-0.035em] sm:text-[3.5rem];
+  }
+  h2 {
+    @apply font-display text-[1.75rem] leading-tight font-bold tracking-[-0.02em] sm:text-[2.25rem];
+  }
+  h3 {
+    @apply font-heading text-[1.0625rem] leading-snug font-semibold tracking-[0.08em] uppercase sm:text-xl sm:tracking-[0.12em];
+  }
+  p {
+    @apply font-sans;
+  }
+
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-500;
   }
 }
 
 @utility input-base {
-  @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-3 text-base text-slate-900 shadow-sm
+  @apply block w-full rounded-md border border-slate-300 bg-white px-3.5 py-3 text-base text-slate-900
     placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none
     disabled:bg-slate-100 aria-invalid:border-red-500 aria-invalid:ring-red-500/20;
 }

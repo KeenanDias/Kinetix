@@ -11,7 +11,7 @@ const TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
 function secret() {
   const s = process.env.REVIEW_LINK_SECRET;
-  if (!s || s.length < 24) throw new Error("REVIEW_LINK_SECRET must be set (24+ chars)");
+  if (!s || s.length < 24 || s.startsWith("change-me")) throw new Error("REVIEW_LINK_SECRET must be set to a random 24+ char string");
   return s;
 }
 

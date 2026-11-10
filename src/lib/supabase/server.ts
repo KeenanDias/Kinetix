@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 /** Cookie-aware client: acts as the signed-in admin (or anon). RLS applies. */
 export async function createClient() {
@@ -21,13 +22,13 @@ export async function createClient() {
   });
 }
 
-/** Returns the signed-in user if they are listed in `public.admins`, otherwise null. */
-export async function getAdmin() {
+/**
+ * Returns the signed-in user if they are listed in `public.admins`, otherwise null.
+ * Cached per request (layout + page + action share one result), and the two checks run in parallel.
+ */
+export const getAdmin = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data: isAdmin } = await supabase.rpc("is_admin");
-  return isAdmin ? { supabase, user } : null;
-}
+  const [{ data: userData }, { data: isAdmin }] = await Promise.all([supabase.auth.getUser(), supabase.rpc("is_admin")]);
+  const user = userData.user;
+  return user && isAdmin ? { supabase, user } : null;
+});

@@ -22,12 +22,14 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() verifies the session token (locally when the project uses signing keys, so no
+  // network round trip) and refreshes it if expired. This is only the login gate: pages and
+  // actions still check admin rights with getAdmin(), and the database enforces RLS.
+  const { data } = await supabase.auth.getClaims();
+  const signedIn = Boolean(data?.claims?.sub);
 
   const path = request.nextUrl.pathname;
-  if (!user && path.startsWith("/admin") && path !== "/admin/login") {
+  if (!signedIn && path.startsWith("/admin") && path !== "/admin/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.searchParams.set("next", path);

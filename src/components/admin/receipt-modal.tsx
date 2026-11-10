@@ -18,7 +18,7 @@ export function ReceiptModal({ url, title, subtitle, onClose }: { url: string; t
       ref={ref}
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-auto w-[min(92vw,640px)] max-h-[92dvh] overflow-hidden rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-slate-950/70 backdrop:backdrop-blur-sm"
+      className="m-auto w-[min(92vw,640px)] max-h-[92dvh] overflow-hidden rounded-md bg-white p-0 shadow-2xl backdrop:bg-slate-950/70"
     >
       <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
         <div className="min-w-0">
@@ -26,17 +26,17 @@ export function ReceiptModal({ url, title, subtitle, onClose }: { url: string; t
           {subtitle && <p className="truncate text-sm text-slate-500">{subtitle}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <a href={url} target="_blank" rel="noreferrer" className="rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Open full size">
+          <a href={url} target="_blank" rel="noreferrer" className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Open full size">
             <ExternalLink className="size-5" />
           </a>
-          <button onClick={onClose} className="rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Close">
+          <button onClick={onClose} className="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Close">
             <X className="size-5" />
           </button>
         </div>
       </div>
       <div className="max-h-[calc(92dvh-60px)] overflow-auto bg-slate-100 p-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={`e-Transfer receipt: ${title}`} className="mx-auto h-auto max-w-full rounded-lg" />
+        <img src={url} alt={`e-Transfer receipt: ${title}`} className="mx-auto h-auto max-w-full rounded-md" />
       </div>
     </dialog>
   );

@@ -14,7 +14,7 @@ export function SessionCard({ session }: { session: PublicSession }) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md",
+        "group relative flex flex-col overflow-hidden rounded-md border bg-white transition-shadow",
         soldOut ? "border-slate-200" : "border-slate-200 hover:border-brand-200",
       )}
     >
@@ -68,8 +68,8 @@ export function SessionCard({ session }: { session: PublicSession }) {
               <Badge tone="green">{left} spots left</Badge>
             )}
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-            <div className={cn("h-full rounded-full", soldOut ? "bg-slate-400" : almostFull ? "bg-volt-400" : "bg-brand-500")} style={{ width: `${pct}%` }} />
+          <div className="h-2 overflow-hidden rounded-sm bg-slate-100" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+            <div className={cn("h-full rounded-sm", soldOut ? "bg-slate-400" : almostFull ? "bg-volt-400" : "bg-brand-500")} style={{ width: `${pct}%` }} />
           </div>
         </div>
 

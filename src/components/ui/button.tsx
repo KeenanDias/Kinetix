@@ -1,11 +1,11 @@
 import { cn } from "@/lib/format";
 
 const variants = {
-  primary: "bg-brand-900 text-white hover:bg-brand-800 shadow-sm",
-  volt: "bg-volt-400 text-brand-950 hover:bg-volt-300 shadow-sm",
+  primary: "bg-brand-900 text-white hover:bg-brand-800",
+  volt: "bg-volt-400 text-brand-950 hover:bg-volt-300",
   outline: "border border-slate-300 bg-white text-slate-800 hover:bg-slate-50",
   ghost: "text-slate-700 hover:bg-slate-100",
-  success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm",
+  success: "bg-emerald-600 text-white hover:bg-emerald-700",
   danger: "bg-white text-red-700 border border-red-200 hover:bg-red-50",
 } as const;
 
@@ -22,7 +22,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function buttonClasses(variant: keyof typeof variants = "primary", size: keyof typeof sizes = "md", className?: string) {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50",
     variants[variant],
     sizes[size],
     className,

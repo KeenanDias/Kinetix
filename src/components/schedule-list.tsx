@@ -33,8 +33,8 @@ export function ScheduleList({ sessions }: { sessions: PublicSession[] }) {
 
   return (
     <div>
-      <div className="sticky top-16 z-20 -mx-4 mb-6 space-y-3 border-b border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur">
-        <div className="flex gap-1 rounded-xl bg-slate-200/70 p-1" role="tablist" aria-label="Date range">
+      <div className="sticky top-16 z-20 -mx-4 mb-6 space-y-3 border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <div className="flex gap-1 rounded-md bg-slate-200 p-1" role="tablist" aria-label="Date range">
           {(
             [
               ["all", "All upcoming"],
@@ -48,8 +48,8 @@ export function ScheduleList({ sessions }: { sessions: PublicSession[] }) {
               aria-selected={range === value}
               onClick={() => setRange(value)}
               className={cn(
-                "flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition",
-                range === value ? "bg-white text-brand-900 shadow-sm" : "text-slate-600 hover:text-slate-900",
+                "flex-1 rounded-md px-3 py-2 text-sm font-semibold transition",
+                range === value ? "bg-white text-brand-900" : "text-slate-600 hover:text-slate-900",
               )}
             >
               {label}
@@ -64,7 +64,7 @@ export function ScheduleList({ sessions }: { sessions: PublicSession[] }) {
                 onClick={() => setVenue(v)}
                 aria-pressed={venue === v}
                 className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition",
+                  "flex shrink-0 items-center gap-1.5 rounded-md border px-3.5 py-1.5 text-sm font-medium transition",
                   venue === v ? "border-brand-900 bg-brand-900 text-white" : "border-slate-300 bg-white text-slate-700 hover:border-slate-400",
                 )}
               >
@@ -77,7 +77,7 @@ export function ScheduleList({ sessions }: { sessions: PublicSession[] }) {
       </div>
 
       {grouped.length === 0 ? (
-        <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+        <div className="flex flex-col items-center rounded-md border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
           <CalendarX2 className="size-10 text-slate-300" />
           <p className="mt-3 font-semibold text-slate-800">No sessions here yet</p>
           <p className="mt-1 text-sm text-slate-500">New drop-ins are posted weekly. Check back soon or follow us on Instagram.</p>
@@ -86,9 +86,9 @@ export function ScheduleList({ sessions }: { sessions: PublicSession[] }) {
         <div className="space-y-8">
           {grouped.map(([day, list]) => (
             <section key={day}>
-              <h2 className="mb-3 font-display text-lg font-semibold uppercase tracking-wide text-slate-500">
+              <h3 className="mb-3 text-slate-500">
                 {formatDate(list[0].starts_at, { weekday: "long", month: "long" })}
-              </h2>
+              </h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 {list.map((s) => (
                   <SessionCard key={s.id} session={s} />

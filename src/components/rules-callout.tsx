@@ -10,15 +10,15 @@ const SKILL_EXPECTATIONS: Record<SkillLevel, string> = {
 
 export function RulesCallout({ skill }: { skill: SkillLevel }) {
   const rules = [
-    { icon: Signal, title: `Skill level: ${SKILL_LABELS[skill]}`, body: SKILL_EXPECTATIONS[skill] + " Please be honest — balanced teams mean better games for everyone." },
-    { icon: RotateCw, title: "Rotation & play", body: "Teams rotate every game; winners stay up to 2 games max. Standard indoor rules, rally scoring to 25. Call your own lines and touches honestly." },
-    { icon: Footprints, title: "Court shoes required", body: "Clean, non-marking indoor shoes only — no outdoor shoes on the court. Knee pads recommended." },
-    { icon: ShieldAlert, title: "Safety", body: "No going under the net into the opposing court. Call \"ball on\" for stray balls and stop play. Report any injury to the host." },
-    { icon: Timer, title: "Arrival & cancellations", body: "Arrive 10 minutes early to warm up. Cancel at least 24h before to be eligible for a refund or transfer. No-shows are not refunded." },
+    { icon: Signal, title: `Skill level: ${SKILL_LABELS[skill]}`, body: SKILL_EXPECTATIONS[skill] + " Please be honest about your level, because balanced teams make better games for everyone." },
+    { icon: RotateCw, title: "Rotation & play", body: "Teams rotate every game, and winners stay on for a maximum of 2 games. We play standard indoor rules with rally scoring to 25. Call your own lines and touches honestly." },
+    { icon: Footprints, title: "Court shoes required", body: "Clean, non-marking indoor shoes only. Outdoor shoes are not allowed on the court. Knee pads are recommended." },
+    { icon: ShieldAlert, title: "Safety", body: "Never go under the net into the other team's court. If a stray ball comes onto the court, call \"ball\" right away. Play stops and the point is replayed. Report any injury to the host." },
+    { icon: Timer, title: "Arrival & cancellations", body: "Arrive 10 minutes early to warm up. Cancel at least 24 hours before the session to be eligible for a refund or transfer. No-shows are not refunded." },
   ];
 
   return (
-    <details className="group rounded-2xl border border-volt-400/50 bg-volt-400/10 open:bg-white open:shadow-sm" open>
+    <details className="group rounded-md border border-volt-400/50 bg-volt-400/10 open:bg-white" open>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-semibold text-brand-900 [&::-webkit-details-marker]:hidden">
         <span className="flex items-center gap-2">
           <ShieldAlert className="size-5 text-flame-500" />

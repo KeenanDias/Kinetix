@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock, MapPin, Signal, Users } from "lucide-react";
+import { LiveRefresh } from "@/components/live-refresh";
 import { RegistrationForm } from "@/components/registration-form";
 import { RulesCallout } from "@/components/rules-callout";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
@@ -29,12 +30,12 @@ export default async function RegisterPage({ params }: { params: Promise<{ id: s
           <ArrowLeft className="size-4" /> All sessions
         </Link>
 
-        <section className="mt-4 overflow-hidden rounded-2xl bg-brand-900 text-white shadow-lg">
+        <section className="mt-4 overflow-hidden rounded-md bg-brand-900 text-white">
           <div className="p-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-volt-300">Session {session.code}</p>
-                <h1 className="mt-1 font-display text-3xl font-bold uppercase leading-tight">{session.venue_name}</h1>
+                <h1 className="mt-1">{session.venue_name}</h1>
               </div>
               <p className="font-display text-3xl font-bold text-volt-400">{formatMoney(session.price_cents)}</p>
             </div>
@@ -53,7 +54,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ id: s
         </div>
 
         {closed ? (
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 text-center">
+          <div className="mt-6 rounded-md border border-slate-200 bg-white p-6 text-center">
             <Badge tone="red">{left === 0 ? "Sold out" : "Registration closed"}</Badge>
             <p className="mt-3 text-slate-600">This session is no longer taking registrations.</p>
             <Link href="/drop-ins" className={buttonClasses("primary", "md", "mt-4")}>Find another session</Link>
@@ -63,6 +64,8 @@ export default async function RegisterPage({ params }: { params: Promise<{ id: s
         )}
       </main>
       <SiteFooter />
+      {/* Keeps "spots left" / sold-out current while someone fills in the form. Typed values are kept. */}
+      <LiveRefresh everyMs={30_000} />
     </>
   );
 }

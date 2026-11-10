@@ -13,5 +13,11 @@ export const siteConfig = {
   },
 } as const;
 
+/** How long data is kept. Shown on /privacy and enforced by /api/cron/cleanup. */
+export const RETENTION = {
+  receiptDaysAfterSession: 30,
+  dataMonthsAfterSession: 12,
+} as const;
+
 export const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
 export const RECEIPT_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
