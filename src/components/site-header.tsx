@@ -14,16 +14,16 @@ export function SiteHeader() {
           </span>
         </Link>
         <nav className="flex items-center gap-1">
-          <Link href="/drop-ins" className="hidden rounded-md px-3 py-2 text-sm font-semibold text-white/90 hover:bg-brand-800 sm:block">
+          <Link href="/drop-ins" className="hidden min-h-11 items-center rounded-md px-3 text-sm font-semibold text-white/90 hover:bg-brand-800 sm:flex">
             Drop-ins
           </Link>
           {siteConfig.instagramUrl && (
-            <a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram" className="rounded-md p-2 text-white/90 hover:bg-brand-800">
+            <a href={siteConfig.instagramUrl} target="_blank" rel="noreferrer" aria-label="Kinetix on Instagram" className="grid size-11 place-items-center rounded-md text-white/90 hover:bg-brand-800">
               <InstagramIcon />
             </a>
           )}
           {siteConfig.contactEmail && (
-            <a href={`mailto:${siteConfig.contactEmail}`} aria-label="Email us" className="rounded-md p-2 text-white/90 hover:bg-brand-800">
+            <a href={`mailto:${siteConfig.contactEmail}`} aria-label="Email Kinetix" className="grid size-11 place-items-center rounded-md text-white/90 hover:bg-brand-800">
               <Mail className="size-5" />
             </a>
           )}
