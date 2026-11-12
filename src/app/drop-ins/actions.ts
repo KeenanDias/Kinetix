@@ -82,7 +82,15 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
   const file = receipt as File;
-  const svc = createServiceClient();
+  // A missing SUPABASE_SERVICE_ROLE_KEY on the host would otherwise crash the page.
+  // Show the player a clear message and log the real reason for the admin.
+  let svc: ReturnType<typeof createServiceClient>;
+  try {
+    svc = createServiceClient();
+  } catch (err) {
+    console.error("[register] server is missing configuration:", err);
+    return { error: "Registration is temporarily unavailable. Please try again later or contact us." };
+  }
 
   const { data: session, error: lookupError } = await svc
     .from("sessions")
@@ -154,7 +162,14 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   }
 
   // 3) Notify the host (one-tap review link) and the player. Failures are logged, not fatal.
-  const reviewUrl = `${siteConfig.siteUrl}/review/${createReviewToken(reg.id)}`;
+  // If REVIEW_LINK_SECRET is missing the one-tap link can't be signed. The registration is
+  // already saved, so fall back to the admin page link instead of failing the player.
+  let reviewUrl = `${siteConfig.siteUrl}/admin/sessions/${session.id}`;
+  try {
+    reviewUrl = `${siteConfig.siteUrl}/review/${createReviewToken(reg.id)}`;
+  } catch (err) {
+    console.error("[register] could not create one-tap review link:", err);
+  }
   await Promise.all([sendEmail(hostNewRegistrationEmail(session, reg, reviewUrl)), sendEmail(playerReceivedEmail(session, reg))]);
 
   redirect(`/drop-ins/submitted?session=${session.id}`);
