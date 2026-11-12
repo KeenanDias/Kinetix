@@ -126,7 +126,8 @@ function spotsWord(r: Registration) {
 
 /** To the host: new application, with a one-tap review link. */
 export function hostNewRegistrationEmail(s: Session, r: Registration, reviewUrl: string): Mail {
-  const to = (serverEnv("HOST_NOTIFY_EMAILS") ?? "").split(",").map((e) => e.trim()).filter(Boolean);
+  // Pull out just the addresses, so stray spaces or notes (e.g. "a@b.com #todo") can't break sending.
+  const to = (serverEnv("HOST_NOTIFY_EMAILS") ?? "").match(/[^\s,;<>"#]+@[^\s,;<>"#]+\.[^\s,;<>"#]+/g) ?? [];
   const n = partySize(r);
   return {
     to,
