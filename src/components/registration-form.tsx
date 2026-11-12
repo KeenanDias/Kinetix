@@ -5,7 +5,7 @@ import { AlertCircle, Check, Copy, ImageUp, Loader2, Send, Trash2, UserPlus, X }
 import { submitRegistration, type RegisterState } from "@/app/drop-ins/actions";
 import { MAX_RECEIPT_BYTES, RECEIPT_MIME_TYPES, siteConfig } from "@/lib/config";
 import { cn, formatMoney, spotsLeft } from "@/lib/format";
-import { MAX_GUESTS, POSITION_LABELS, SKILL_LABELS, type PublicSession } from "@/lib/types";
+import { MAX_GUESTS, MAX_PLAYER_NOTE, POSITION_LABELS, SKILL_LABELS, type PublicSession } from "@/lib/types";
 import { Button } from "./ui/button";
 
 type FieldName = keyof NonNullable<RegisterState["fieldErrors"]>;
@@ -15,6 +15,7 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
   const [state, formAction, pending] = useActionState(submitRegistration.bind(null, session.id), {} as RegisterState);
   const [name, setName] = useState("");
   const [guests, setGuests] = useState<Guest[]>([]);
+  const [playerNote, setPlayerNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -246,6 +247,33 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
           )}
           <input ref={fileInput} type="file" name="receipt_picker" accept={RECEIPT_MIME_TYPES.join(",")} className="sr-only" onChange={(e) => { pickFile(e.target.files?.[0]); e.target.value = ""; }} />
           {(fileError || fe.receipt) && <p className="mt-1.5 text-sm font-medium text-red-700">{fileError ?? fe.receipt}</p>}
+        </div>
+
+        <div>
+          <div className="mb-1.5 flex items-baseline justify-between gap-3">
+            <label htmlFor="player_note" className="text-sm font-semibold text-slate-800">
+              Note for {siteConfig.hostName} <span className="font-normal text-slate-500">(optional)</span>
+            </label>
+            <span className={cn("text-xs tabular-nums", playerNote.length > MAX_PLAYER_NOTE ? "font-semibold text-red-700" : "text-slate-500")}>
+              {playerNote.length}/{MAX_PLAYER_NOTE}
+            </span>
+          </div>
+          <textarea
+            id="player_note"
+            name="player_note"
+            rows={3}
+            value={playerNote}
+            onChange={(e) => setPlayerNote(e.target.value)}
+            maxLength={MAX_PLAYER_NOTE}
+            aria-invalid={!!fe.player_note}
+            placeholder="e.g. I might be 10 minutes late, or my friend sent the e-Transfer for both of us."
+            className="input-base"
+          />
+          {fe.player_note ? (
+            <p className="mt-1.5 text-sm font-medium text-red-700">{fe.player_note}</p>
+          ) : (
+            <p className="mt-1.5 text-xs text-slate-500">Only {siteConfig.hostName} sees this, when reviewing your registration.</p>
+          )}
         </div>
 
         <label className={cn("flex cursor-pointer gap-3 rounded-md border p-4 text-sm", fe.waiver ? "border-red-300 bg-red-50" : "border-slate-200 bg-slate-50")}>

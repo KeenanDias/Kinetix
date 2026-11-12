@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { Check, Clock3, FileImage, Hourglass, Loader2, Mail, Phone, RotateCcw, Users, X } from "lucide-react";
+import { Check, Clock3, FileImage, Hourglass, Loader2, Mail, MessageSquareText, Phone, RotateCcw, Users, X } from "lucide-react";
 import { updateRegistrationStatus } from "@/app/admin/actions";
 import { cn, formatDateTime, formatMoney } from "@/lib/format";
 import {
@@ -156,6 +156,7 @@ export function RegistrationsTable({ rows: incoming, spotsOpen }: { rows: Regist
                     <td className="px-4 py-3">
                       <p className="font-semibold text-slate-900">{r.full_name}</p>
                       <GuestList row={r} />
+                      <PlayerNote row={r} />
                       <p className="mt-1 flex items-center gap-1 text-xs text-slate-500"><Clock3 className="size-3" />{formatDateTime(r.created_at)}</p>
                       {r.admin_note && <p className="mt-1 max-w-48 text-xs italic text-slate-500">“{r.admin_note}”</p>}
                     </td>
@@ -191,6 +192,7 @@ export function RegistrationsTable({ rows: incoming, spotsOpen }: { rows: Regist
                     <Badge tone={TAB_TONE[r.status]}>{SKILL_LABELS[r.skill_level]}</Badge>
                   </div>
                   <GuestList row={r} />
+                      <PlayerNote row={r} />
                   <p className="text-xs text-slate-500">{POSITION_LABELS[r.position]} · {formatDateTime(r.created_at)}</p>
                   <p className="text-sm">
                     <b>{formatMoney(r.amount_cents)}</b>
@@ -229,6 +231,18 @@ export function RegistrationsTable({ rows: incoming, spotsOpen }: { rows: Regist
         />
       )}
     </section>
+  );
+}
+
+function PlayerNote({ row }: { row: RegistrationRow }) {
+  if (!row.player_note) return null;
+  return (
+    <div className="mt-1.5 max-w-xs rounded-md border-l-4 border-volt-500 bg-volt-400/15 px-2.5 py-1.5 text-xs text-slate-800">
+      <p className="flex items-center gap-1 font-semibold text-brand-900">
+        <MessageSquareText className="size-3.5 shrink-0" aria-hidden /> Note from player
+      </p>
+      <p className="mt-0.5 whitespace-pre-line break-words">{row.player_note}</p>
+    </div>
   );
 }
 
@@ -292,7 +306,7 @@ function RejectDialog({ row, onCancel, onConfirm }: { row: RegistrationRow; onCa
         />
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button variant="danger" className="border-red-600 bg-red-600 text-white hover:bg-red-700" onClick={() => onConfirm(note)}>
+          <Button variant="destructive" onClick={() => onConfirm(note)}>
             <X className="size-4" /> Reject
           </Button>
         </div>

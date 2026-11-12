@@ -5,7 +5,7 @@ export const siteConfig = {
   timezone: process.env.NEXT_PUBLIC_TIMEZONE ?? "America/Toronto",
   hostName: process.env.NEXT_PUBLIC_HOST_NAME ?? "Harsh",
   instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL ?? "",
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "",
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info.kinetixsports@gmail.com",
   etransfer: {
     email: process.env.NEXT_PUBLIC_ETRANSFER_EMAIL ?? "payments@kinetix.example.com",
     question: process.env.NEXT_PUBLIC_ETRANSFER_QUESTION ?? "What is the business name?",

@@ -42,6 +42,8 @@ export type Registration = {
   guest_positions?: PlayerPosition[] | null;
   /** Registrant asked for their group to be on one team (migration 0004). */
   same_team?: boolean | null;
+  /** Optional note from the player to the host (migration 0006). */
+  player_note?: string | null;
   /** 1 + guests. Generated column from migration 0002. */
   party_size?: number | null;
   status: RegistrationStatus;
@@ -77,6 +79,7 @@ export const STATUS_LABELS: Record<RegistrationStatus, string> = {
 };
 
 export const MAX_GUESTS = 5;
+export const MAX_PLAYER_NOTE = 500;
 
 /** Players in a registration (payer + guests). Works before and after migration 0002. */
 export function partySize(r: Pick<Registration, "guest_names" | "party_size">) {

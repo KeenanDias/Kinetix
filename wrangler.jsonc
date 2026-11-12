@@ -1,0 +1,19 @@
+// Cloudflare Workers config for the Kinetix site (built by @opennextjs/cloudflare).
+// Secrets (SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, ...) are NOT kept here: add them in the
+// Cloudflare dashboard (Worker -> Settings -> Variables and Secrets). NEXT_PUBLIC_* values must
+// also be added as *build* variables, because Next.js bakes them in at build time.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kinetix",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Request logs and errors in the dashboard (Observability tab). Free.
+  "observability": {
+    "enabled": true
+  }
+}

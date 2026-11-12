@@ -123,7 +123,7 @@ export function DeleteSessionDialog({ sessionId, label, registrations, players, 
               <Button type="button" variant="ghost" onClick={close} disabled={pending}>
                 Keep run
               </Button>
-              <Button type="submit" disabled={!confirmed || pending} className="border border-red-600 bg-red-600 text-white hover:bg-red-700">
+              <Button type="submit" variant="destructive" disabled={!confirmed || pending}>
                 {pending ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
                 {notify && canNotify ? "Delete and email players" : "Delete run"}
               </Button>

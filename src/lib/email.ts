@@ -81,8 +81,8 @@ function layout(title: string, body: string) {
   return `<!doctype html><html><body style="margin:0;background:#f1f5f9;font-family:${FONT};color:#0f172a;font-size:16px;line-height:1.55">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:24px 12px"><tr><td align="center">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:4px;overflow:hidden;border:1px solid #e2e8f0">
-<tr><td style="background:#0b2a6b;padding:20px 24px;color:#ffffff;font-family:${HEADING_FONT};font-weight:800;font-size:20px;letter-spacing:.5px">
-KINETIX <span style="color:#ffc20e">VOLLEYBALL</span></td></tr>
+<tr><td style="background:#183054;padding:20px 24px;color:#ffffff;font-family:${HEADING_FONT};font-weight:800;font-size:20px;letter-spacing:.5px">
+KINETIX <span style="color:#f0e448">VOLLEYBALL</span></td></tr>
 <tr><td style="padding:24px"><h1 style="margin:0 0 12px;font-family:${HEADING_FONT};font-size:24px;font-weight:800;letter-spacing:-0.02em">${title}</h1>${body}</td></tr>
 <tr><td style="padding:16px 24px;background:#f8fafc;color:#64748b;font-size:12px">Kinetix Volleyball Drop-ins${
     siteConfig.contactEmail ? ` · Questions? ${esc(siteConfig.contactEmail)}` : ""
@@ -98,7 +98,7 @@ function rows(items: Array<[string, string]>) {
     .join("")}</table>`;
 }
 
-function button(href: string, label: string, bg = "#0b2a6b", fg = "#ffffff") {
+function button(href: string, label: string, bg = "#183054", fg = "#ffffff") {
   return `<a href="${href}" style="display:inline-block;background:${bg};color:${fg};text-decoration:none;font-weight:700;padding:14px 22px;border-radius:4px;margin:4px 8px 4px 0">${label}</a>`;
 }
 
@@ -142,8 +142,9 @@ export function hostNewRegistrationEmail(s: Session, r: Registration, reviewUrl:
         ["Email / Phone", `${esc(r.email)}<br>${esc(r.phone)}`],
         ["Spots filled", `${s.filled_spots} / ${s.max_players}`],
       ])}
+      ${r.player_note ? note(`<b>Note from ${esc(r.full_name.split(" ")[0])}:</b><br>${esc(r.player_note).replace(/\n/g, "<br>")}`) : ""}
       <p style="margin:0 0 16px">Check your bank for the e-Transfer, then tap below to see the screenshot and approve.</p>
-      ${button(reviewUrl, "Review &amp; Approve →", "#ffc20e", "#0b2a6b")}
+      ${button(reviewUrl, "Review &amp; Approve →", "#f0e448", "#183054")}
       <p style="color:#64748b;font-size:12px;margin-top:16px">This link works without logging in for 14 days. Don't forward it.</p>`,
     ),
   };
@@ -180,7 +181,7 @@ export function playerApprovedEmail(s: Session, r: Registration): Mail {
       `<p>Hi ${firstName(r)}, your payment was verified and ${spotsWord(r)} locked in. See you on the court!</p>
       ${rows([
         ["Date & time", when(s)],
-        ["Location", `${esc(s.venue_name)}<br><a href="${mapsUrl(s.venue_address)}" style="color:#0b2a6b">${esc(s.venue_address)}</a>`],
+        ["Location", `${esc(s.venue_name)}<br><a href="${mapsUrl(s.venue_address)}" style="color:#183054">${esc(s.venue_address)}</a>`],
         ["Court", s.court ? esc(s.court) : "Posted at the gym on arrival"],
         ...(s.arrival_info ? ([["Arrival info", esc(s.arrival_info).replace(/\n/g, "<br>")]] as Array<[string, string]>) : []),
         ["Players", playersLine(r)],
@@ -228,7 +229,7 @@ export function playerRejectedEmail(s: Session, r: Registration): Mail {
 export function sessionCancelledEmail(s: Session, r: Registration, reason?: string | null): Mail {
   const host = esc(siteConfig.hostName);
   const contact = siteConfig.contactEmail
-    ? `<a href="mailto:${esc(siteConfig.contactEmail)}" style="color:#0b2a6b">${esc(siteConfig.contactEmail)}</a>`
+    ? `<a href="mailto:${esc(siteConfig.contactEmail)}" style="color:#183054">${esc(siteConfig.contactEmail)}</a>`
     : "replying to this email";
   return {
     to: r.email,
@@ -244,7 +245,7 @@ export function sessionCancelledEmail(s: Session, r: Registration, reason?: stri
       ])}
       ${reason ? note(`<b>Reason from ${host}:</b> ${esc(reason).replace(/\n/g, "<br>")}`, "#fef2f2") : ""}
       <p><b>Your payment:</b> contact ${host} at ${contact} to get a refund, or to use it as credit toward the next run.</p>
-      <p style="color:#64748b;font-size:13px">Check the schedule for other upcoming runs: <a href="${siteConfig.siteUrl}/drop-ins" style="color:#0b2a6b">${siteConfig.siteUrl.replace(/^https?:\/\//, "")}/drop-ins</a></p>`,
+      <p style="color:#64748b;font-size:13px">Check the schedule for other upcoming runs: <a href="${siteConfig.siteUrl}/drop-ins" style="color:#183054">${siteConfig.siteUrl.replace(/^https?:\/\//, "")}/drop-ins</a></p>`,
     ),
   };
 }
@@ -276,7 +277,7 @@ export function sessionUpdatedEmail(s: Session, r: Registration, changes: Sessio
       ${message ? note(`Message from ${esc(siteConfig.hostName)}: ${esc(message).replace(/\n/g, "<br>")}`) : ""}
       ${rows([
         ["Date & time", when(s)],
-        ["Location", `${esc(s.venue_name)}<br><a href="${mapsUrl(s.venue_address)}" style="color:#0b2a6b">${esc(s.venue_address)}</a>`],
+        ["Location", `${esc(s.venue_name)}<br><a href="${mapsUrl(s.venue_address)}" style="color:#183054">${esc(s.venue_address)}</a>`],
         ...(r.status === "approved" && s.court ? ([["Court", esc(s.court)]] as Array<[string, string]>) : []),
       ])}
       <p>${statusLine}</p>

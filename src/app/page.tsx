@@ -5,8 +5,9 @@ import { ScheduleList } from "@/components/schedule-list";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { getUpcomingSessions } from "@/lib/sessions";
 
-// Served from cache and rebuilt at most every 15s, so many visitors cost one DB query.
-export const revalidate = 15;
+// Rendered on each visit (one small Supabase query) so spots left are always current.
+// Cloudflare hosting has no free page cache that could rebuild this every few seconds.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const sessions = await getUpcomingSessions();

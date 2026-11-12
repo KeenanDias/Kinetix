@@ -74,6 +74,13 @@ export default async function ReviewPage({ params }: { params: Promise<{ token: 
         </div>
       )}
 
+      {reg.player_note && (
+        <div className="mt-3 rounded-md border-l-4 border-volt-500 bg-volt-400/15 p-3 text-sm text-slate-800">
+          <p className="font-semibold text-brand-900">Note from {reg.full_name.split(" ")[0]}</p>
+          <p className="mt-1 whitespace-pre-line break-words">{reg.player_note}</p>
+        </div>
+      )}
+
       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <Info label="Expected">{formatMoney(reg.amount_cents)}{party > 1 ? ` (${party} players)` : ""}</Info>
         <Info label="Sender name">{reg.sender_name}</Info>

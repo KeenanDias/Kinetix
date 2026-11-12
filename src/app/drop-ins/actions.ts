@@ -8,6 +8,7 @@ import { createReviewToken } from "@/lib/review-token";
 import { createServiceClient } from "@/lib/supabase/admin";
 import {
   MAX_GUESTS,
+  MAX_PLAYER_NOTE,
   POSITION_LABELS,
   SKILL_LABELS,
   type PlayerPosition,
@@ -19,7 +20,10 @@ import {
 export type RegisterState = {
   error?: string;
   fieldErrors?: Partial<
-    Record<"full_name" | "email" | "phone" | "skill_level" | "position" | "waiver" | "sender_name" | "receipt" | "guests", string>
+    Record<
+      "full_name" | "email" | "phone" | "skill_level" | "position" | "waiver" | "sender_name" | "receipt" | "guests" | "player_note",
+      string
+    >
   >;
 };
 
@@ -56,6 +60,8 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   const guestNames = guests.map((g) => g.name);
   const guestPositions = guests.map((g) => g.position as PlayerPosition);
   const sameTeam = guests.length > 0 && fd.get("same_team") === "on";
+  // Optional note to the host. Line breaks kept, extra blank lines collapsed.
+  const playerNote = str(fd, "player_note").replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
   const partySize = 1 + guests.length;
 
   const fieldErrors: RegisterState["fieldErrors"] = {};
@@ -69,6 +75,7 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   if (!(input.position in POSITION_LABELS)) fieldErrors.position = "Choose a position.";
   if (!input.waiver) fieldErrors.waiver = "You must accept the rules & waiver to play.";
   if (input.sender_name.length < 2) fieldErrors.sender_name = "Enter the name on the account that sent the e-Transfer.";
+  if (playerNote.length > MAX_PLAYER_NOTE) fieldErrors.player_note = `Keep your note under ${MAX_PLAYER_NOTE} characters.`;
   if (!(receipt instanceof File) || receipt.size === 0) fieldErrors.receipt = "Upload your e-Transfer screenshot.";
   else if (!RECEIPT_MIME_TYPES.includes(receipt.type)) fieldErrors.receipt = "Screenshot must be a JPG, PNG, WEBP or HEIC image.";
   else if (receipt.size > MAX_RECEIPT_BYTES) fieldErrors.receipt = "Screenshot must be under 5 MB.";
@@ -130,6 +137,8 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
       receipt_path: receiptPath,
       // Only sent when there are guests, so solo sign-ups still work before migration 0002 is applied.
       ...(guests.length > 0 ? { guest_names: guestNames, guest_positions: guestPositions, same_team: sameTeam } : {}),
+      // Only sent when filled in, so sign-ups without a note still work before migration 0006.
+      ...(playerNote ? { player_note: playerNote } : {}),
     })
     .select("*")
     .single<Registration>();

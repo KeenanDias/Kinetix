@@ -72,7 +72,7 @@ export function QuickReview({
       {showReject && (
         <div className="space-y-2 rounded-md border border-red-200 bg-red-50 p-3">
           <textarea name="note" rows={2} placeholder="Optional reason (sent to player)" className="input-base" />
-          <Button name="status" value="rejected" className="w-full border-red-600 bg-red-600 text-white hover:bg-red-700" disabled={pending}>
+          <Button name="status" value="rejected" variant="destructive" className="w-full" disabled={pending}>
             Confirm reject
           </Button>
         </div>

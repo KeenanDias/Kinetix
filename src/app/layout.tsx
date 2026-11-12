@@ -12,12 +12,17 @@ export const metadata: Metadata = {
   description: "Book your spot at Kinetix volleyball drop-in sessions.",
 };
 
-export const viewport: Viewport = { themeColor: "#0b2a6b" };
+// Logo navy: colours the phone's browser bar to match the header.
+export const viewport: Viewport = { themeColor: "#0c1830" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${outfit.variable} ${dmSans.variable} ${lato.variable}`}>
-      <body className="min-h-dvh font-sans">{children}</body>
+      {/* Browser extensions like Grammarly add attributes to <body> before React loads.
+          This only ignores attribute differences on <body> itself, not its children. */}
+      <body className="min-h-dvh font-sans" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

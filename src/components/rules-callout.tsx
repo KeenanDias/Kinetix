@@ -18,10 +18,10 @@ export function RulesCallout({ skill }: { skill: SkillLevel }) {
   ];
 
   return (
-    <details className="group rounded-md border border-volt-400/50 bg-volt-400/10 open:bg-white" open>
+    <details className="group rounded-md border border-l-4 border-volt-500/60 border-l-flame-500 bg-volt-400/10 open:bg-white" open>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 font-semibold text-brand-900 [&::-webkit-details-marker]:hidden">
         <span className="flex items-center gap-2">
-          <ShieldAlert className="size-5 text-flame-500" />
+          <ShieldAlert className="size-5 text-flame-600" />
           Rules &amp; skill expectations
         </span>
         <ChevronDown className="size-5 text-slate-500 transition-transform group-open:rotate-180" />

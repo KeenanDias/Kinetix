@@ -3,7 +3,8 @@ import { ScheduleList } from "@/components/schedule-list";
 import { SiteFooter, SiteHeader } from "@/components/site-header";
 import { getUpcomingSessions } from "@/lib/sessions";
 
-export const revalidate = 15;
+// Rendered on each visit so spots left are always current (see src/app/page.tsx).
+export const dynamic = "force-dynamic";
 export const metadata = { title: "Drop-in Schedule" };
 
 export default async function DropInsPage() {

@@ -7,6 +7,8 @@ const variants = {
   ghost: "text-slate-700 hover:bg-slate-100",
   success: "bg-emerald-600 text-white hover:bg-emerald-700",
   danger: "bg-white text-red-700 border border-red-200 hover:bg-red-50",
+  // Solid red for the final "yes, do it" button in reject/delete confirmations.
+  destructive: "bg-red-600 text-white border border-red-600 hover:bg-red-700 hover:border-red-700",
 } as const;
 
 const sizes = {

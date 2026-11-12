@@ -1,19 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eef3ff;
-  --color-brand-100: #dbe5ff;
-  --color-brand-200: #b6c9fb;
-  --color-brand-500: #2457d6;
-  --color-brand-600: #1a45b5;
-  --color-brand-700: #133896;
-  --color-brand-800: #0e2d78;
-  --color-brand-900: #0b2a6b;
-  --color-brand-950: #061740;
-  --color-volt-300: #ffd95c;
-  --color-volt-400: #ffc20e;
-  --color-volt-500: #f5a800;
-  --color-flame-500: #f7941d;
+  /* Colours sampled from kinetix-logo.png. */
+  /* Blue: the "K" (#3060a8 / #306cb4) down to its deep navy shadow (#183054 / #0c1830). */
+  --color-brand-50: #eef3fa;
+  --color-brand-100: #d9e4f3;
+  --color-brand-200: #b3c8e6;
+  --color-brand-300: #85a6d3;
+  --color-brand-500: #306cb4;
+  --color-brand-600: #3060a8;
+  --color-brand-700: #27508c;
+  --color-brand-800: #1e3d6b;
+  --color-brand-900: #183054;
+  --color-brand-950: #0c1830;
+  /* Yellow: the lightning bolt (#f0e448). Use as a fill with navy text, or as text on navy. */
+  --color-volt-300: #f6ee8a;
+  --color-volt-400: #f0e448;
+  --color-volt-500: #f0c03c;
+  /* Orange: the bolt's flame edge (#e48430). flame-600 is the darker shade for icons on white. */
+  --color-flame-500: #e48430;
+  --color-flame-600: #c2601e;
 
   /* Body: Lato. Display (h1, h2, prices, wordmark): Outfit. Utility headings (h3): DM Sans. */
   --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
