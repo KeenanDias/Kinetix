@@ -1,5 +1,6 @@
 import "server-only";
 import { siteConfig } from "./config";
+import { serverEnv } from "./server-env";
 import { formatDate, formatMoney, formatTimeRange, mapsUrl } from "./format";
 import { POSITION_LABELS, SKILL_LABELS, guestLabel, guestList, partySize, type Registration, type Session } from "./types";
 
@@ -8,11 +9,11 @@ export type Mail = { to: string | string[]; subject: string; html: string; reply
 const RESEND_URL = "https://api.resend.com";
 
 function sender() {
-  return process.env.EMAIL_FROM ?? "Kinetix <onboarding@resend.dev>";
+  return serverEnv("EMAIL_FROM") ?? "Kinetix <onboarding@resend.dev>";
 }
 
 function resendKey() {
-  const key = process.env.RESEND_API_KEY;
+  const key = serverEnv("RESEND_API_KEY");
   return key && !key.startsWith("re_xxxx") ? key : null;
 }
 
@@ -125,7 +126,7 @@ function spotsWord(r: Registration) {
 
 /** To the host: new application, with a one-tap review link. */
 export function hostNewRegistrationEmail(s: Session, r: Registration, reviewUrl: string): Mail {
-  const to = (process.env.HOST_NOTIFY_EMAILS ?? "").split(",").map((e) => e.trim()).filter(Boolean);
+  const to = (serverEnv("HOST_NOTIFY_EMAILS") ?? "").split(",").map((e) => e.trim()).filter(Boolean);
   const n = partySize(r);
   return {
     to,

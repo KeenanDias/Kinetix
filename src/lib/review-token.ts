@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { serverEnv } from "./server-env";
 
 /**
  * Signed, expiring links that let the host review a registration from the
@@ -10,7 +11,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const TTL_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
 function secret() {
-  const s = process.env.REVIEW_LINK_SECRET;
+  const s = serverEnv("REVIEW_LINK_SECRET");
   if (!s || s.length < 24 || s.startsWith("change-me")) throw new Error("REVIEW_LINK_SECRET must be set to a random 24+ char string");
   return s;
 }

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { RETENTION } from "@/lib/config";
+import { serverEnv } from "@/lib/server-env";
 import { createServiceClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const BATCH = 100; // Storage remove() accepts up to 1000 paths; keep requests small.
 
 function authorized(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
+  const secret = serverEnv("CRON_SECRET");
   if (!secret || secret.length < 24 || secret.startsWith("change-me")) return false;
   const given = Buffer.from(req.headers.get("authorization") ?? "");
   const expected = Buffer.from(`Bearer ${secret}`);
@@ -56,6 +57,31 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // --- 1b. Screenshots uploaded by players who never finished registering -------------------
+  // The browser uploads first, then submits the form. If they give up, the file is unused.
+  let unusedUploadsDeleted = 0;
+  const { data: folders, error: folderErr } = await svc.storage.from("receipts").list("", { limit: 1000 });
+  if (folderErr) return fail("list screenshot folders", folderErr);
+  for (const folder of folders ?? []) {
+    if (folder.id) continue; // a file at the top level, not a session folder
+    const { data: files, error: filesErr } = await svc.storage.from("receipts").list(folder.name, { limit: 1000 });
+    if (filesErr) return fail("list screenshots", filesErr);
+    const old = (files ?? [])
+      .filter((f) => f.id && f.created_at && Date.parse(f.created_at) < now - DAY_MS)
+      .map((f) => `${folder.name}/${f.name}`);
+    for (let i = 0; i < old.length; i += BATCH) {
+      const chunk = old.slice(i, i + BATCH);
+      const { data: used, error: usedErr } = await svc.from("registrations").select("receipt_path").in("receipt_path", chunk);
+      if (usedErr) return fail("check screenshot usage", usedErr);
+      const inUse = new Set((used ?? []).map((r) => r.receipt_path as string));
+      const unused = chunk.filter((p) => !inUse.has(p));
+      if (unused.length === 0) continue;
+      const { error: rmErr } = await svc.storage.from("receipts").remove(unused);
+      if (rmErr) return fail("delete unused screenshots", rmErr);
+      unusedUploadsDeleted += unused.length;
+    }
+  }
+
   // --- 2. Everything else, after 12 months --------------------------------------
   // Only sessions whose screenshots are all gone, so no files are ever orphaned.
   const { data: expired, error: expErr } = await svc.from("sessions").select("id").lt("ends_at", dataCutoff);
@@ -73,8 +99,8 @@ export async function POST(req: NextRequest) {
     sessionsDeleted++;
   }
 
-  console.info(`[cleanup] receipts deleted: ${receiptsDeleted}, sessions deleted: ${sessionsDeleted}`);
-  return NextResponse.json({ ok: true, receiptsDeleted, sessionsDeleted });
+  console.info(`[cleanup] receipts deleted: ${receiptsDeleted}, unused uploads deleted: ${unusedUploadsDeleted}, sessions deleted: ${sessionsDeleted}`);
+  return NextResponse.json({ ok: true, receiptsDeleted, unusedUploadsDeleted, sessionsDeleted });
 }
 
 function fail(step: string, error: unknown) {

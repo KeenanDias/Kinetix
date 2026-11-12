@@ -37,6 +37,54 @@ const EXT: Record<string, string> = {
 
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
+const UNAVAILABLE = "Registration is temporarily unavailable. Please try again later or contact us.";
+
+/** Service client, or null (logged) when the host is missing its Supabase settings. */
+function serviceClientOrNull() {
+  try {
+    return createServiceClient();
+  } catch (err) {
+    console.error("[register] server is missing configuration:", err instanceof Error ? err.message : String(err));
+    return null;
+  }
+}
+
+export type ReceiptUploadTicket = { registrationId: string; path: string; token: string } | { error: string };
+
+/**
+ * Step 1 of registering: hands the browser a one-time signed link to upload the e-Transfer
+ * screenshot straight to the private `receipts` bucket. The image never passes through this
+ * server, which keeps requests small (Cloudflare's firewall blocks large form posts, and the
+ * free Workers plan has a tight CPU limit).
+ */
+export async function startReceiptUpload(sessionId: string, contentType: string, size: number): Promise<ReceiptUploadTicket> {
+  if (!RECEIPT_MIME_TYPES.includes(contentType)) return { error: "Screenshot must be a JPG, PNG, WEBP or HEIC image." };
+  if (!Number.isFinite(size) || size <= 0 || size > MAX_RECEIPT_BYTES) return { error: "Screenshot must be under 5 MB." };
+  if (!/^[0-9a-f-]{36}$/i.test(sessionId)) return { error: "This session no longer exists." };
+
+  const svc = serviceClientOrNull();
+  if (!svc) return { error: UNAVAILABLE };
+
+  const { data: session } = await svc
+    .from("sessions")
+    .select("id, starts_at, max_players, filled_spots")
+    .eq("id", sessionId)
+    .eq("is_published", true)
+    .maybeSingle<Pick<Session, "id" | "starts_at" | "max_players" | "filled_spots">>();
+  if (!session) return { error: "This session no longer exists." };
+  if (new Date(session.starts_at) < new Date()) return { error: "This session has already started." };
+  if (session.filled_spots >= session.max_players) return { error: "Sorry, this session just sold out." };
+
+  const registrationId = randomUUID();
+  const path = `${session.id}/${registrationId}.${EXT[contentType]}`;
+  const { data, error } = await svc.storage.from("receipts").createSignedUploadUrl(path);
+  if (error || !data) {
+    console.error("[register] could not create upload link", error);
+    return { error: "We couldn't prepare your screenshot upload. Please try again." };
+  }
+  return { registrationId, path, token: data.token };
+}
+
 export async function submitRegistration(sessionId: string, _prev: RegisterState, fd: FormData): Promise<RegisterState> {
   // Honeypot: bots fill every field. Pretend success.
   if (str(fd, "company")) redirect("/drop-ins/submitted");
@@ -50,7 +98,9 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
     waiver: fd.get("waiver") === "on",
     sender_name: str(fd, "sender_name"),
   };
-  const receipt = fd.get("receipt");
+  // The screenshot was already uploaded by the browser (see startReceiptUpload).
+  const registrationId = str(fd, "registration_id");
+  const receiptPath = str(fd, "receipt_path");
   // Friends the registrant is paying for. Each row is a name + position; rows with a blank name are ignored.
   const rawPositions = fd.getAll("guest_position").map((v) => String(v));
   const guests = fd
@@ -76,20 +126,28 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
   if (!input.waiver) fieldErrors.waiver = "You must accept the rules & waiver to play.";
   if (input.sender_name.length < 2) fieldErrors.sender_name = "Enter the name on the account that sent the e-Transfer.";
   if (playerNote.length > MAX_PLAYER_NOTE) fieldErrors.player_note = `Keep your note under ${MAX_PLAYER_NOTE} characters.`;
-  if (!(receipt instanceof File) || receipt.size === 0) fieldErrors.receipt = "Upload your e-Transfer screenshot.";
-  else if (!RECEIPT_MIME_TYPES.includes(receipt.type)) fieldErrors.receipt = "Screenshot must be a JPG, PNG, WEBP or HEIC image.";
-  else if (receipt.size > MAX_RECEIPT_BYTES) fieldErrors.receipt = "Screenshot must be under 5 MB.";
+  // The path must be the one startReceiptUpload issued for this session: "<session>/<registration id>.<ext>".
+  const pathPattern = new RegExp(`^${sessionId}/${registrationId}\\.(jpg|png|webp|heic|heif)$`);
+  if (!/^[0-9a-f-]{36}$/i.test(registrationId) || !pathPattern.test(receiptPath))
+    fieldErrors.receipt = "Upload your e-Transfer screenshot.";
   if (Object.keys(fieldErrors).length) return { fieldErrors };
 
-  const file = receipt as File;
   // A missing SUPABASE_SERVICE_ROLE_KEY on the host would otherwise crash the page.
-  // Show the player a clear message and log the real reason for the admin.
-  let svc: ReturnType<typeof createServiceClient>;
-  try {
-    svc = createServiceClient();
-  } catch (err) {
-    console.error("[register] server is missing configuration:", err);
-    return { error: "Registration is temporarily unavailable. Please try again later or contact us." };
+  const svc = serviceClientOrNull();
+  if (!svc) return { error: UNAVAILABLE };
+
+  // Make sure the screenshot actually arrived in storage (and isn't oversized).
+  const fileName = receiptPath.slice(sessionId.length + 1);
+  const { data: stored, error: listError } = await svc.storage.from("receipts").list(sessionId, { search: registrationId, limit: 5 });
+  const uploaded = stored?.find((f) => f.name === fileName);
+  if (listError || !uploaded) {
+    if (listError) console.error("[register] could not check upload", listError);
+    return { fieldErrors: { receipt: "Your screenshot didn't finish uploading. Please choose it again and resubmit." } };
+  }
+  const uploadedSize = Number((uploaded.metadata as { size?: number } | null)?.size ?? 0);
+  if (uploadedSize > MAX_RECEIPT_BYTES) {
+    await svc.storage.from("receipts").remove([receiptPath]);
+    return { fieldErrors: { receipt: "Screenshot must be under 5 MB." } };
   }
 
   const { data: session, error: lookupError } = await svc
@@ -116,19 +174,7 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
       },
     };
 
-  // 1) Upload receipt to the private bucket.
-  const registrationId = randomUUID();
-  const receiptPath = `${session.id}/${registrationId}.${EXT[file.type]}`;
-  const { error: uploadError } = await svc.storage.from("receipts").upload(receiptPath, file, {
-    contentType: file.type,
-    upsert: false,
-  });
-  if (uploadError) {
-    console.error("[register] upload failed", uploadError);
-    return { error: "We couldn't upload your screenshot. Please try again." };
-  }
-
-  // 2) Create the registration.
+  // Create the registration (the screenshot is already in the private bucket).
   const { data: reg, error: insertError } = await svc
     .from("registrations")
     .insert({
@@ -152,7 +198,7 @@ export async function submitRegistration(sessionId: string, _prev: RegisterState
     .single<Registration>();
 
   if (insertError || !reg) {
-    await svc.storage.from("receipts").remove([receiptPath]);
+    // The screenshot is kept so a retry can reuse it; unused uploads are removed by the daily cleanup.
     if (insertError?.code === "23505")
       return { error: "You've already applied for this session with this email. Watch your inbox for an update." };
     if (insertError?.code === "PGRST204")

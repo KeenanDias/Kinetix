@@ -2,7 +2,8 @@
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { AlertCircle, Check, Copy, ImageUp, Loader2, Send, Trash2, UserPlus, X } from "lucide-react";
-import { submitRegistration, type RegisterState } from "@/app/drop-ins/actions";
+import { startReceiptUpload, submitRegistration, type RegisterState } from "@/app/drop-ins/actions";
+import { getBrowserClient } from "@/lib/supabase/client";
 import { MAX_RECEIPT_BYTES, RECEIPT_MIME_TYPES, siteConfig } from "@/lib/config";
 import { cn, formatMoney, spotsLeft } from "@/lib/format";
 import { MAX_GUESTS, MAX_PLAYER_NOTE, POSITION_LABELS, SKILL_LABELS, type PublicSession } from "@/lib/types";
@@ -20,6 +21,9 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const uploaded = useRef<{ file: File; registrationId: string; path: string } | null>(null);
+  const busy = pending || uploading;
   const fileInput = useRef<HTMLInputElement>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const nextGuestId = useRef(1);
@@ -61,19 +65,60 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
     setGuests((all) => all.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   }
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  // If the server says the screenshot is missing, upload it again on the next submit.
+  useEffect(() => {
+    if (state.fieldErrors?.receipt) uploaded.current = null;
+  }, [state]);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     // Submit via transition (not <form action>) so React doesn't reset the form if validation fails.
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     fd.delete("receipt_picker");
-    if (file) fd.set("receipt", file);
+    setFileError(null);
+    if (!file) {
+      setFileError("Upload your e-Transfer screenshot.");
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    // 1) Upload the screenshot straight to private storage (reused if they resubmit with the same file).
+    let done = uploaded.current?.file === file ? uploaded.current : null;
+    if (!done) {
+      setUploading(true);
+      try {
+        const ticket = await startReceiptUpload(session.id, file.type, file.size);
+        if ("error" in ticket) {
+          setFileError(ticket.error);
+          return;
+        }
+        const { error } = await getBrowserClient()
+          .storage.from("receipts")
+          .uploadToSignedUrl(ticket.path, ticket.token, file, { contentType: file.type });
+        if (error) {
+          setFileError("We couldn't upload your screenshot. Check your connection and try again.");
+          return;
+        }
+        done = { file, registrationId: ticket.registrationId, path: ticket.path };
+        uploaded.current = done;
+      } catch {
+        setFileError("We couldn't upload your screenshot. Check your connection and try again.");
+        return;
+      } finally {
+        setUploading(false);
+      }
+    }
+
+    // 2) Send the form (text only) with a reference to the uploaded screenshot.
+    fd.set("registration_id", done.registrationId);
+    fd.set("receipt_path", done.path);
     startTransition(() => formAction(fd));
   }
 
   return (
     <form onSubmit={onSubmit} noValidate className="mt-6 space-y-6">
       <div ref={errorRef}>
-        {(state.error || Object.keys(fe).length > 0) && (
+        {(state.error || Object.keys(fe).length > 0 || fileError) && (
           <div role="alert" className="flex gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             <AlertCircle className="size-5 shrink-0" />
             <p>{state.error ?? "Please fix the highlighted fields below."}</p>
@@ -286,8 +331,8 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
         </label>
       </Card>
 
-      <Button type="submit" variant="volt" size="lg" disabled={pending} className="w-full text-base">
-        {pending ? (<><Loader2 className="size-5 animate-spin" /> Submitting…</>) : (<><Send className="size-5" /> Submit registration{players > 1 ? ` for ${players} players` : ""}</>)}
+      <Button type="submit" variant="volt" size="lg" disabled={busy} className="w-full text-base">
+        {uploading ? (<><Loader2 className="size-5 animate-spin" /> Uploading screenshot…</>) : pending ? (<><Loader2 className="size-5 animate-spin" /> Submitting…</>) : (<><Send className="size-5" /> Submit registration{players > 1 ? ` for ${players} players` : ""}</>)}
       </Button>
       <p className="text-center text-xs text-slate-500">
         Your spot is confirmed only after {siteConfig.hostName} verifies your payment. Your details and screenshot are handled as
