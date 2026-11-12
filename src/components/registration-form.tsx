@@ -121,7 +121,7 @@ export function RegistrationForm({ session }: { session: PublicSession }) {
         {(state.error || Object.keys(fe).length > 0 || fileError) && (
           <div role="alert" className="flex gap-3 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             <AlertCircle className="size-5 shrink-0" />
-            <p>{state.error ?? "Please fix the highlighted fields below."}</p>
+            <p>{state.error ?? (Object.keys(fe).length > 0 ? "Please fix the highlighted fields below." : fileError)}</p>
           </div>
         )}
       </div>
