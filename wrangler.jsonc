@@ -12,6 +12,9 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Keep variables added in the Cloudflare dashboard when deploying (otherwise a deploy
+  // removes any plain-text vars that aren't listed in this file).
+  "keep_vars": true,
   // Request logs and errors in the dashboard (Observability tab). Free.
   "observability": {
     "enabled": true
